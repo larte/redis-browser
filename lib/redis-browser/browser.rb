@@ -38,10 +38,21 @@ module RedisBrowser
       end.values.sort_by {|e| e[:name] }
     end
 
+    def try_unmarshal(str)
+      begin
+        Marshal.load(str)
+      rescue
+        str
+      end
+    end
+
     def item_type(e)
+      e = try_unmarshal(e)
       begin
         ["json", MultiJson.decode(e)]
       rescue MultiJson::LoadError => ex
+        ["string", e]
+      rescue TypeError => ex
         ["string", e]
       end
     end
